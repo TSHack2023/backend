@@ -6,6 +6,6 @@ type User struct {
 }
 
 type UserResponse struct {
-	ID    uint   `json:"id" gorm:"primaryKey"`
-	Email string `json:"email" gorm:"unique"`
+	Username uint   `json:"username" gorm:"primaryKey"`
+	Password string `json:"password" gorm:"unique"`
 }
