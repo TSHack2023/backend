@@ -11,7 +11,7 @@ import (
 )
 
 type IUserUsecase interface {
-	SighUp(user model.User) (model.UserResponse, error)
+	SighUp(user model.User) error
 	Login(user model.User) (string, error)
 }
 
@@ -23,25 +23,21 @@ func NewUserUsecase(ur repository.IUserRepository) IUserUsecase {
 	return &userUsecase{ur}
 }
 
-func (uu *userUsecase) SighUp(user model.User) (model.UserResponse, error) {
+func (uu *userUsecase) SighUp(user model.User) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
-		return model.UserResponse{}, err
+		return err
 	}
-	newUser := model.User{Email: user.Email, Password: string(hash)}
+	newUser := model.User{Username: user.Username, Password: string(hash)}
 	if err := uu.ur.CreateUser(&newUser); err != nil {
-		return model.UserResponse{}, err
+		return err
 	}
-	resUser := model.UserResponse{
-		ID:    newUser.ID,
-		Email: newUser.Email,
-	}
-	return resUser, nil
+	return nil
 }
 
 func (uu *userUsecase) Login(user model.User) (string, error) {
 	storedUser := model.User{}
-	if err := uu.ur.GetUserByEmail(&storedUser, user.Email); err != nil {
+	if err := uu.ur.GetUserByUsername(&storedUser, user.Username); err != nil {
 		return "", err
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
@@ -49,7 +45,7 @@ func (uu *userUsecase) Login(user model.User) (string, error) {
 		return "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": storedUser.ID,
+		"user_id": storedUser.Username,
 		"exp":     time.Now().Add(time.Hour * 12).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
