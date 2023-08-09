@@ -7,7 +7,7 @@ import (
 )
 
 type IFileRepository interface {
-	GetAllFiles(files *[]model.File, userId uint) error
+	GetAllFiles(files *[]model.File) error
 	GetFileReviews(file *model.File, fileId uint) error
 	GetFileByUsername(files *[]model.File, username string) error
 	CreateFile(file *model.File) error
@@ -21,7 +21,7 @@ func NewFileRepository(db *gorm.DB) IFileRepository {
 	return &fileRepository{db}
 }
 
-func (fr *fileRepository) GetAllFiles(files *[]model.File, userId uint) error {
+func (fr *fileRepository) GetAllFiles(files *[]model.File) error {
 	if err := fr.db.Find(files).Error; err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func (fr *fileRepository) GetAllFiles(files *[]model.File, userId uint) error {
 }
 
 func (fr *fileRepository) GetFileReviews(file *model.File, fileId uint) error {
-	if err := fr.db.Joins("Eval").Where("file_id=?", fileId).First(file).Error; err != nil {
+	if err := fr.db.Where("file_id=?", fileId).First(file).Error; err != nil {
 		return err
 	}
 	return nil
