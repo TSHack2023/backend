@@ -9,7 +9,7 @@ type IFileUsecase interface {
 	GetAllFiles() ([]model.FileResponse, error)
 	GetFileReviews(fileId uint) (model.FileReviewResponse, error)
 	GetFileByUsername(username string) ([]model.FileResponse, error)
-	CreateFile(file model.File) error
+	CreateFile(file model.File) (model.File, error)
 }
 
 type fileUsecase struct {
@@ -85,9 +85,9 @@ func (fu *fileUsecase) GetFileByUsername(username string) ([]model.FileResponse,
 	return resfiles, nil
 }
 
-func (fu *fileUsecase) CreateFile(file model.File) error {
+func (fu *fileUsecase) CreateFile(file model.File) (model.File, error) {
 	if err := fu.fr.CreateFile(&file); err != nil {
-		return err
+		return model.File{}, err
 	}
-	return nil
+	return file, nil
 }

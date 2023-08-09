@@ -10,6 +10,8 @@ type IScoreRepository interface {
 	GetAllScores(scores *[]model.Score, evalId uint) error
 	GetScoreById(score *model.Score, scoreId uint) error
 	CreateScore(score *model.Score) error
+	GetScoreByUsername(scores *[]model.Score, username string) error
+	GetUsersByEvalId(users *[]string, evalId uint) error
 }
 
 type scoreRepository struct {
@@ -36,6 +38,20 @@ func (sr *scoreRepository) GetScoreById(score *model.Score, scoreId uint) error 
 
 func (sr *scoreRepository) CreateScore(score *model.Score) error {
 	if err := sr.db.Create(score).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (sr *scoreRepository) GetScoreByUsername(scores *[]model.Score, username string) error {
+	if err := sr.db.Where("username = ?", username).Find(scores).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (sr *scoreRepository) GetUsersByEvalId(users *[]string, evalId uint) error {
+	if err := sr.db.Model(&model.Score{}).Where("eval_id = ?", evalId).Pluck("username", users).Error; err != nil {
 		return err
 	}
 	return nil
