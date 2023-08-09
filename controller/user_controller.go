@@ -4,8 +4,6 @@ import (
 	"backend/model"
 	"backend/usecase"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,50 +23,34 @@ func NewUserController(uu usecase.IUserUsecase) IUserController {
 }
 
 func (uc *userController) SignUp(c echo.Context) error {
+	result := map[string]bool{"result": false}
 	user := model.User{}
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, result)
 	}
-	userRes, err := uc.uu.SighUp(user)
+	err := uc.uu.SighUp(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, result)
 	}
-	return c.JSON(http.StatusCreated, userRes)
+	result["result"] = true
+	return c.JSON(http.StatusCreated, result)
 }
 
 func (uc *userController) Login(c echo.Context) error {
+	result := map[string]bool{"result": false}
 	user := model.User{}
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, result)
 	}
 	//tokenString, err := uc.uu.Login(user)
-	tokenString, err := uc.uu.Login(user)
+	_, err := uc.uu.Login(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, result)
 	}
-	cookie := new(http.Cookie)
-	cookie.Name = "token"
-	cookie.Value = tokenString
-	cookie.Expires = time.Now().Add(24 * time.Hour)
-	cookie.Path = "/"
-	cookie.Domain = os.Getenv("API_DOMAIN")
-	//cookie.Secure = true
-	cookie.HttpOnly = true
-	cookie.SameSite = http.SameSiteNoneMode
-	c.SetCookie(cookie)
-	return c.NoContent(http.StatusOK)
+	result["result"] = true
+	return c.JSON(http.StatusOK, result)
 }
 
 func (uc *userController) LogOut(c echo.Context) error {
-	cookie := new(http.Cookie)
-	cookie.Name = "token"
-	cookie.Value = ""
-	cookie.Expires = time.Now()
-	cookie.Path = "/"
-	cookie.Domain = os.Getenv("API_DOMAIN")
-	//cookie.Secure = true
-	cookie.HttpOnly = true
-	cookie.SameSite = http.SameSiteNoneMode
-	c.SetCookie(cookie)
 	return c.NoContent(http.StatusOK)
 }
