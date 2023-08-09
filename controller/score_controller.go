@@ -20,8 +20,8 @@ type scoreController struct {
 	eu usecase.IEvalUsecase
 }
 
-func NewScoreController() IScoreController {
-	return &scoreController{}
+func NewScoreController(su usecase.IScoreUsecase, eu usecase.IEvalUsecase) IScoreController {
+	return &scoreController{su, eu}
 }
 
 func (sc *scoreController) Answer(c echo.Context) error {

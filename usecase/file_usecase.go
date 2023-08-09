@@ -17,8 +17,8 @@ type fileUsecase struct {
 	er repository.IEvalRepository
 }
 
-func NewFileUsecase() IFileUsecase {
-	return &fileUsecase{}
+func NewFileUsecase(fr repository.IFileRepository, er repository.IEvalRepository) IFileUsecase {
+	return &fileUsecase{fr, er}
 }
 
 func (fu *fileUsecase) GetAllFiles() ([]model.FileResponse, error) {
