@@ -10,8 +10,6 @@ type IEvalRepository interface {
 	GetAllEvals(evals *[]model.Eval, fileId uint) error
 	GetEvalById(eval *model.Eval, evalId uint) error
 	CreateEval(eval *model.Eval) error
-	// UpdateTask(task *model.Task, userId uint, taskId uint) error
-	// DeleteTask(userId uint, taskId uint) error
 }
 
 type evalRepository struct {

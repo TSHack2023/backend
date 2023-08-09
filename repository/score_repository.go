@@ -10,8 +10,6 @@ type IScoreRepository interface {
 	GetAllScores(scores *[]model.Score, evalId uint) error
 	GetScoreById(score *model.Score, scoreId uint) error
 	CreateScore(score *model.Score) error
-	// UpdateTask(task *model.Task, userId uint, taskId uint) error
-	// DeleteTask(userId uint, taskId uint) error
 }
 
 type scoreRepository struct {
