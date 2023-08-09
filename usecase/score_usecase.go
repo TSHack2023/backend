@@ -18,8 +18,8 @@ type scoreUsecase struct {
 	er repository.IEvalRepository
 }
 
-func NewScoreUsecase(sr repository.IScoreRepository) IScoreUsecase {
-	return &scoreUsecase{}
+func NewScoreUsecase(sr repository.IScoreRepository, er repository.IEvalRepository) IScoreUsecase {
+	return &scoreUsecase{sr, er}
 }
 
 func (su *scoreUsecase) GetAllScores(evalId uint) ([]model.ScoreResponse, error) {
