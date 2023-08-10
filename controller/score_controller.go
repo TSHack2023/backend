@@ -3,9 +3,7 @@ package controller
 import (
 	"backend/model"
 	"backend/usecase"
-	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,19 +22,28 @@ func NewScoreController(su usecase.IScoreUsecase, eu usecase.IEvalUsecase) IScor
 	return &scoreController{su, eu}
 }
 
+type answerRequest struct {
+	Username  string               `json:"username"`
+	FileId    uint                 `json:"file_id"`
+	Scorelist []model.ScoreRequest `json:"scorelist"`
+}
+
+type accessAnswerRequest struct {
+	FileId uint `json:"file_id"`
+}
+
 func (sc *scoreController) Answer(c echo.Context) error {
 	result := map[string]bool{"result": false}
-	username := c.FormValue("username")
-	scorelist := c.FormValue("scorelist")
-	var data []map[string]interface{}
-	if err := json.Unmarshal([]byte(scorelist), &data); err != nil {
-		return c.JSON(http.StatusInternalServerError, result)
+	answer := answerRequest{}
+	if err := c.Bind(&answer); err != nil {
+		return c.JSON(http.StatusBadRequest, result)
 	}
-	for _, score := range data {
+	username := answer.Username
+	for _, score := range answer.Scorelist {
 		add := model.Score{
 			Username: username,
-			EvalId:   score["eval_id"].(uint),
-			Score:    score["score"].(uint),
+			EvalId:   score.EvalId,
+			Score:    score.Score,
 		}
 		if err := sc.su.CreateScore(add); err != nil {
 			return c.JSON(http.StatusInternalServerError, result)
@@ -48,9 +55,11 @@ func (sc *scoreController) Answer(c echo.Context) error {
 
 func (sc *scoreController) AccessAnswer(c echo.Context) error {
 	result := map[string]bool{"result": false}
-	fileId := c.Param("file_id")
-	file_id, _ := strconv.Atoi(fileId)
-	evalres, err := sc.eu.GetAllEvals(uint(file_id))
+	fileId := accessAnswerRequest{}
+	if err := c.Bind(&fileId); err != nil {
+		return c.JSON(http.StatusBadRequest, result)
+	}
+	evalres, err := sc.eu.GetAllEvals(uint(fileId.FileId))
 	answers := []model.AnswerResponse{}
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, result)
