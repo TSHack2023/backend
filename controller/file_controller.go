@@ -50,6 +50,9 @@ func (fc *fileController) GetFile(c echo.Context) error {
 
 func (fc *fileController) FileReview(c echo.Context) error {
 	fileId := fileReviewRequest{}
+	if err := c.Bind(&fileId); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]bool{"result": false})
+	}
 	fileres, err := fc.fu.GetFileReviews(uint(fileId.FileId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]bool{"result": false})

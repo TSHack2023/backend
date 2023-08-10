@@ -12,10 +12,10 @@ func NewRouter(uc controller.IUserController, fc controller.IFileController, sc 
 	e.POST("/login", uc.Login)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/getfile", fc.GetFile)
-	e.GET("/filereview/:file_id", fc.FileReview)
+	e.POST("/filereview", fc.FileReview)
 	e.POST("/fileupload", fc.FileUpload)
 	e.POST("/searchfile", fc.SearchFile)
 	e.POST("/answer", sc.Answer)
-	e.GET("/accessanswer/:file_id", sc.AccessAnswer)
+	e.POST("/accessanswer", sc.AccessAnswer)
 	return e
 }
