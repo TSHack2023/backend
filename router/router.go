@@ -14,7 +14,7 @@ func NewRouter(uc controller.IUserController, fc controller.IFileController, sc 
 	e.GET("/getfile", fc.GetFile)
 	e.GET("/filereview/:file_id", fc.FileReview)
 	e.POST("/fileupload", fc.FileUpload)
-	e.GET("/searchfile", fc.SearchFile)
+	e.POST("/searchfile", fc.SearchFile)
 	e.POST("/answer", sc.Answer)
 	e.GET("/accessanswer/:file_id", sc.AccessAnswer)
 	return e
