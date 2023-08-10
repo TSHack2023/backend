@@ -57,14 +57,7 @@ func (fc *fileController) FileReview(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]bool{"result": false})
 	}
-	response := struct {
-		FileResponse model.FileReviewResponse
-		Result       bool `json:"result"`
-	}{
-		FileResponse: fileres,
-		Result:       true,
-	}
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, fileres)
 }
 
 func (fc *fileController) FileUpload(c echo.Context) error {

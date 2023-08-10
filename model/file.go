@@ -20,5 +20,6 @@ type FileResponse struct {
 type FileReviewResponse struct {
 	Result   bool           `json:"result"`
 	Fileurl  string         `json:"fileurl"`
+	Filename string         `json:"filename"`
 	Evallist []EvalResponse `json:"evallist"`
 } //評価ページに移動したときに送る
