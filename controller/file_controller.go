@@ -3,9 +3,7 @@ package controller
 import (
 	"backend/model"
 	"backend/usecase"
-	"encoding/json"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -27,6 +25,21 @@ func NewFileController(fu usecase.IFileUsecase, eu usecase.IEvalUsecase) IFileCo
 	return &fileController{fu, eu}
 }
 
+type fileUploadRequest struct {
+	Username string              `json:"username"`
+	Filename string              `json:"filename"`
+	Fileurl  string              `json:"fileurl"`
+	Evallist []model.EvalRequest `json:"evallist"`
+}
+
+type searchFileRequest struct {
+	Username string `json:"username"`
+}
+
+type fileReviewRequest struct {
+	FileId uint `json:"file_id"`
+}
+
 func (fc *fileController) GetFile(c echo.Context) error {
 	filesres, err := fc.fu.GetAllFiles()
 	if err != nil {
@@ -36,9 +49,8 @@ func (fc *fileController) GetFile(c echo.Context) error {
 }
 
 func (fc *fileController) FileReview(c echo.Context) error {
-	fileId := c.Param("file_id")
-	file_id, _ := strconv.Atoi(fileId)
-	fileres, err := fc.fu.GetFileReviews(uint(file_id))
+	fileId := fileReviewRequest{}
+	fileres, err := fc.fu.GetFileReviews(uint(fileId.FileId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]bool{"result": false})
 	}
@@ -54,34 +66,32 @@ func (fc *fileController) FileReview(c echo.Context) error {
 
 func (fc *fileController) FileUpload(c echo.Context) error {
 	result := map[string]bool{"result": false}
-	filename := c.FormValue("filename")
-	username := c.FormValue("username")
-	file_url := c.FormValue("fileurl")
+	fileuploadrequest := fileUploadRequest{}
+	if err := c.Bind(&fileuploadrequest); err != nil {
+		return c.JSON(http.StatusBadRequest, result)
+	}
 	created_at := time.Now()
 	file := model.File{
-		Filename:  filename,
-		Username:  username,
-		Fileurl:   file_url,
+		Filename:  fileuploadrequest.Filename,
+		Username:  fileuploadrequest.Username,
+		Fileurl:   fileuploadrequest.Fileurl,
 		CreatedAt: created_at,
 	}
 	file, err := fc.fu.CreateFile(file)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, result)
 	}
-	evallist := c.FormValue("evallist")
-	var data []map[string]interface{}
-	if err := json.Unmarshal([]byte(evallist), &data); err != nil {
-		return c.JSON(http.StatusInternalServerError, result)
-	}
-	for _, eval := range data {
+	evallist := fileuploadrequest.Evallist
+	for _, eval := range evallist {
 		add := model.Eval{
 			FileId:      file.FileId,
-			Evalname:    eval["evalname"].(string),
-			Evalmin:     eval["evalmin"].(uint),
-			Evalmax:     eval["evalmax"].(uint),
-			Explanation: eval["explanation"].(string),
+			Evalname:    eval.Evalname,
+			Evalmin:     eval.Evalmin,
+			Evalmax:     eval.Evalmax,
+			Explanation: eval.Explanation,
 		}
-		if err := fc.eu.CreateEval(add); err != nil {
+		err := fc.eu.CreateEval(add)
+		if err != nil {
 			return c.JSON(http.StatusInternalServerError, result)
 		}
 	}
@@ -90,8 +100,11 @@ func (fc *fileController) FileUpload(c echo.Context) error {
 }
 
 func (fc *fileController) SearchFile(c echo.Context) error {
-	username := c.FormValue("username")
-	filesres, err := fc.fu.GetFileByUsername(username)
+	username := searchFileRequest{}
+	if err := c.Bind(&username); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	filesres, err := fc.fu.GetFileByUsername(username.Username)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

@@ -22,3 +22,8 @@ type FinalAnswerResponse struct {
 	Result bool             `json:"result"`
 	Answer []AnswerResponse `json:"answerlist"`
 }
+
+type ScoreRequest struct {
+	EvalId uint `json:"eval_id" gorm:"not null"`
+	Score  uint `json:"score" gorm:"not null"`
+}

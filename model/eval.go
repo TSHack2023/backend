@@ -16,3 +16,10 @@ type EvalResponse struct {
 	Evalmax     uint   `json:"evalmax" gorm:"not null"`
 	Explanation string `json:"explanation"`
 }
+
+type EvalRequest struct {
+	Evalname    string `json:"evalname" gorm:"not null"`
+	Evalmin     uint   `json:"evalmin" gorm:"not null"`
+	Evalmax     uint   `json:"evalmax" gorm:"not null"`
+	Explanation string `json:"explanation"`
+}
