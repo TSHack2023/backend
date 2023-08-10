@@ -62,6 +62,7 @@ func (fu *fileUsecase) GetFileReviews(fileId uint) (model.FileReviewResponse, er
 	resfilereview := model.FileReviewResponse{
 		Result:   true,
 		Fileurl:  file.Fileurl,
+		Filename: file.Filename,
 		Evallist: evalresponses,
 	}
 	return resfilereview, nil
