@@ -4,10 +4,12 @@ import (
 	"backend/controller"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func NewRouter(uc controller.IUserController, fc controller.IFileController, sc controller.IScoreController) *echo.Echo {
 	e := echo.New()
+	e.Use(middleware.CORS())
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.Login)
 	e.POST("/logout", uc.LogOut)
